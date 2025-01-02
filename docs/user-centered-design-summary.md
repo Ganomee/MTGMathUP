@@ -20,13 +20,16 @@ We aim to build a web application that helps Magic: The Gathering players optimi
 3. [Daniel’s Return to MTG](./storyboards/scenario-c.md)
 4. [Sam’s Stream Content & Deck Brewing](./storyboards/scenario-d.md)
 
-## 4. Requirement Engineering
-From the scenarios above, we extracted the following system requirements:
-1. The system shall allow quick logging of match results on mobile devices...
-2. The system shall provide a data-driven mulligan comparison tool...
-3. ...
+## 4. Requirements & User Flows
 
-## 5. User Flows & Wireframes
+For a detailed list of functional requirements and interaction flows derived from our personas and storyboards, please see the following documents:
+
+- [User Requirements](./requirements/requirements.md)
+- [User Flows](./requirements/userflows.md)
+
+These files illustrate exactly **what** the system must do and **how** our users will accomplish each task.
+
+## 5.  Wireframes
 *(Add flow diagrams or wireframe screenshots here.)*
 
 ## 6. Iterative Design & Feedback
