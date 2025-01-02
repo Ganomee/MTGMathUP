@@ -1,0 +1,12 @@
+# docs/_config.yml
+title: "MTGMathUP"
+description: "A user-centered design portfolio for Magic: The Gathering analytics"
+theme: jekyll-theme-minimal  # or another built-in theme, e.g. jekyll-theme-slate, minima, etc.
+
+# If you find you need a baseurl (depends on your repository settings), you can specify it:
+# baseurl: "/MTGMathUP"
+
+# If you'd like Jekyll to process files beginning with underscores or special paths, you can add:
+# include:
+#   - _pages
+#   - ...
