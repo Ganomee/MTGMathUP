@@ -30,4 +30,4 @@ Lisa is a highly competitive Magic player who frequently travels for larger tour
 ## AI Image Prompt
 > A determined woman in her early 30s, wearing headphones, sitting at a desk with a laptop open to multiple Magic the Gathering decklists and data charts, looking focused and confident, in a modern office setting, realistic style.
 
-![Lisa Chen Persona](../images/lisaChen.webp "Lisa Chen Persona")
+![Lisa Chen Persona](../images/LisaChen.webp "Lisa Chen Persona")
