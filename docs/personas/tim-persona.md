@@ -24,4 +24,4 @@ Tim is a passionate but somewhat casual-competitive MTG player. He attends local
 - Primarily uses a smartphone
 - Prefers easy-to-navigate apps
 
-![Tim Carter Persona](../images/tim-persona.webp "Tim Carter Persona")
+![Tim Carter Persona](../images/TimCarter.webp "Tim Carter Persona")

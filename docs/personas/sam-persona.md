@@ -30,4 +30,4 @@ Sam is a content creator who streams on Twitch and occasionally uploads YouTube 
 ## AI Image Prompt
 > A creative-looking streamer, mid-20s, in a vibrant streaming setup with dual monitors displaying Magic the Gathering deck analytics, wearing colorful headphones, full of energy, realistic style.
 
-![Sam Roberts Persona](../images/sam-persona.webp "Sam Roberts Persona")
+![Sam Roberts Persona](../images/samRoberts.webp "Sam Roberts Persona")

@@ -30,4 +30,4 @@ Daniel is a returning player who left Magic a decade ago. He's now exploring new
 ## AI Image Prompt
 > A man in his late 30s, holding a box of older Magic the Gathering cards, looking slightly nostalgic but curious, at a table with modern MTG expansions visible, using a laptop or tablet to research new decks, realistic style.
 
-![Daniel Gutierrez Persona](../images/daniel-persona.webp "Daniel Gutierrez Persona")
+![Daniel Gutierrez Persona](../images/DanielGutierrez.webp "Daniel Gutierrez Persona")
