@@ -1,0 +1,15 @@
+# Scryfall Data Loader Dependencies
+
+# Async database connectivity
+asyncpg==0.29.0
+
+# HTTP client for API calls
+httpx==0.25.2
+
+# Structured logging
+structlog==23.2.0
+
+# Environment and configuration
+python-dotenv==1.0.0
+
+

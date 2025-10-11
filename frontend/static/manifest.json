@@ -1,0 +1,25 @@
+{
+	"name": "MTG Mullagain",
+	"short_name": "Mullagain",
+	"description": "Analyze and optimize your Magic: The Gathering mulligan decisions",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#0E68AB",
+	"orientation": "portrait-primary",
+	"icons": [
+		{
+			"src": "/favicon.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "/favicon.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	],
+	"categories": ["games", "entertainment"],
+	"lang": "en",
+	"dir": "ltr"
+}
