@@ -1,38 +1,58 @@
 <script lang="ts">
-	import type { Hand } from '$lib/api/client';
+	import type { Hand } from '$lib/api';
+	import { getCardNames, getCardType, getCardColor } from '$lib/electric/card-utils.js';
+	import { onMount } from 'svelte';
 
 	export let hand: Hand;
 
-	// Mock card names for display (in real app, this would come from card lookup)
-	const cardNames: Record<number, string> = {
-		1: 'Lightning Bolt',
-		2: 'Counterspell', 
-		3: 'Brainstorm',
-		4: 'Ponder',
-		5: 'Island',
-		6: 'Mountain',
-		7: 'Volcanic Island',
-		8: 'Force of Will',
-		9: 'Delver of Secrets',
-		10: 'Snapcaster Mage'
-	};
+	let cardNames: Record<number, string> = {};
+	let cardTypes: Record<number, string> = {};
+	let cardColors: Record<number, string[]> = {};
+	let loading = true;
+
+	onMount(async () => {
+		try {
+			// Load card names for all cards in the hand
+			cardNames = await getCardNames(hand.cardIntIds);
+			
+			// Load card types and colors
+			for (const cardId of hand.cardIntIds) {
+				cardTypes[cardId] = await getCardType(cardId);
+				cardColors[cardId] = await getCardColor(cardId);
+			}
+		} catch (error) {
+			console.error('Failed to load card data:', error);
+		} finally {
+			loading = false;
+		}
+	});
 
 	function getCardName(cardId: number): string {
 		return cardNames[cardId] || `Card ${cardId}`;
 	}
 
-	function getCardType(cardId: number): string {
-		// Simple type detection based on card ID
-		if (cardId <= 4) return 'Instant';
-		if (cardId <= 7) return 'Land';
-		return 'Creature';
+	function getCardTypeById(cardId: number): string {
+		return cardTypes[cardId] || 'Unknown';
 	}
 
-	function getCardColor(cardId: number): string {
-		// Simple color detection
-		if (cardId === 1 || cardId === 6 || cardId === 7) return 'red';
-		if (cardId === 2 || cardId === 3 || cardId === 4 || cardId === 5) return 'blue';
-		return 'gray';
+	function getCardColorById(cardId: number): string[] {
+		return cardColors[cardId] || [];
+	}
+
+	function getCardColorClass(cardId: number): string {
+		const colors = getCardColorById(cardId);
+		if (colors.length === 0) return 'bg-gray-50';
+		if (colors.length === 1) {
+			switch (colors[0]) {
+				case 'R': return 'bg-red-50 border-red-200';
+				case 'U': return 'bg-blue-50 border-blue-200';
+				case 'G': return 'bg-green-50 border-green-200';
+				case 'W': return 'bg-white border-gray-200';
+				case 'B': return 'bg-gray-800 text-white border-gray-600';
+				default: return 'bg-gray-50';
+			}
+		}
+		return 'bg-gradient-to-r from-yellow-50 to-purple-50 border-yellow-200';
 	}
 </script>
 
@@ -42,29 +62,46 @@
 		<span class="text-sm text-gray-500">{hand.size} cards</span>
 	</div>
 	
-	<div class="grid grid-cols-2 gap-2">
-		{#each hand.cardIntIds as cardId}
-			<div class="px-3 py-2 bg-blue-50 rounded-lg text-sm font-medium">
-				{getCardName(cardId)}
-			</div>
-		{/each}
-	</div>
+	{#if loading}
+		<div class="grid grid-cols-2 gap-2">
+			{#each hand.cardIntIds as cardId}
+				<div class="px-3 py-2 bg-gray-100 rounded-lg text-sm animate-pulse">
+					Loading...
+				</div>
+			{/each}
+		</div>
+	{:else}
+		<div class="grid grid-cols-2 gap-2">
+			{#each hand.cardIntIds as cardId}
+				<div class="px-3 py-2 rounded-lg text-sm font-medium border {getCardColorClass(cardId)}">
+					<div class="font-semibold">{getCardName(cardId)}</div>
+					<div class="text-xs opacity-75">{getCardTypeById(cardId)}</div>
+				</div>
+			{/each}
+		</div>
+	{/if}
 	
 	<!-- Hand Analysis -->
-	<div class="mt-4 p-3 bg-gray-50 rounded-lg">
-		<div class="text-sm text-gray-600">
-			<div class="flex justify-between">
-				<span>Lands:</span>
-				<span>{hand.cardIntIds.filter(cardId => getCardType(cardId) === 'Land').length}</span>
-			</div>
-			<div class="flex justify-between">
-				<span>Spells:</span>
-				<span>{hand.cardIntIds.filter(cardId => getCardType(cardId) !== 'Land').length}</span>
-			</div>
-			<div class="flex justify-between">
-				<span>Hash:</span>
-				<span class="font-mono text-xs">{hand.hash64.toString(16)}</span>
+	{#if !loading}
+		<div class="mt-4 p-3 bg-gray-50 rounded-lg">
+			<div class="text-sm text-gray-600">
+				<div class="flex justify-between">
+					<span>Lands:</span>
+					<span>{hand.cardIntIds.filter(cardId => getCardTypeById(cardId).includes('Land')).length}</span>
+				</div>
+				<div class="flex justify-between">
+					<span>Spells:</span>
+					<span>{hand.cardIntIds.filter(cardId => !getCardTypeById(cardId).includes('Land')).length}</span>
+				</div>
+				<div class="flex justify-between">
+					<span>Creatures:</span>
+					<span>{hand.cardIntIds.filter(cardId => getCardTypeById(cardId).includes('Creature')).length}</span>
+				</div>
+				<div class="flex justify-between">
+					<span>Hash:</span>
+					<span class="font-mono text-xs">{hand.hash64.toString(16)}</span>
+				</div>
 			</div>
 		</div>
-	</div>
+	{/if}
 </div>

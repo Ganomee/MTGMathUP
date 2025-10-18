@@ -1,4 +1,4 @@
-# MTG Mullagain ML Worker Dependencies
+# MTG Mullagain ML Worker Dependencies with CUDA support
 
 # FastAPI and web framework
 fastapi==0.104.1
@@ -8,14 +8,16 @@ uvicorn[standard]==0.24.0
 asyncpg==0.29.0
 pgvector==0.2.4
 
-# Machine Learning
-sentence-transformers==2.2.2
-torch==2.1.0
-transformers==4.35.0
+# Machine Learning with CUDA support
+# PyTorch with CUDA 12.1 support for GPU acceleration
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch>=2.2.0
+sentence-transformers>=2.2.2
+transformers>=4.35.0
 
 # Data processing
-numpy==1.24.3
-pandas==2.0.3
+numpy>=1.24.3
+pandas>=2.0.3
 
 # HTTP client for API calls
 httpx==0.25.2

@@ -4,7 +4,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	function handleDeckImported(event: CustomEvent) {
+	function handleDeckImported(event: CustomEvent<any>) {
 		// TODO: Handle deck import success
 		console.log('Deck imported:', event.detail);
 	}

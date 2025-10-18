@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test - Sync Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Sync Page Button Test</h1>
+        
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <p class="text-yellow-700">
+                <strong>Important:</strong> The buttons in the sync test page are hidden by default!
+            </p>
+            <p class="text-yellow-700 mt-2">
+                You need to <strong>click the "+ Add Deck" button</strong> first to reveal the form with the Create/Update buttons.
+            </p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Step-by-Step Instructions</h2>
+            
+            <ol class="list-decimal list-inside space-y-3">
+                <li class="p-3 bg-gray-50 rounded">
+                    <strong>Go to:</strong> <a href="http://localhost:8080/sync-test" class="text-blue-600 underline" target="_blank">http://localhost:8080/sync-test</a>
+                </li>
+                
+                <li class="p-3 bg-gray-50 rounded">
+                    <strong>Look for the blue button</strong> at the top right that says: 
+                    <button class="px-4 py-2 bg-blue-500 text-white rounded ml-2">+ Add Deck</button>
+                </li>
+                
+                <li class="p-3 bg-gray-50 rounded">
+                    <strong>Click "+ Add Deck"</strong> - This will reveal the form
+                </li>
+                
+                <li class="p-3 bg-gray-50 rounded">
+                    <strong>You'll now see:</strong>
+                    <ul class="list-disc list-inside ml-4 mt-2">
+                        <li>Three input fields (Name, Format, Owner)</li>
+                        <li>Two buttons at the bottom right:</li>
+                        <ul class="list-disc list-inside ml-8">
+                            <li><button class="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm">Cancel</button></li>
+                            <li><button class="px-3 py-1 bg-green-500 text-white rounded text-sm">Create</button></li>
+                        </ul>
+                    </ul>
+                </li>
+                
+                <li class="p-3 bg-gray-50 rounded">
+                    <strong>Fill in the form</strong> and click the green "Create" button
+                </li>
+                
+                <li class="p-3 bg-gray-50 rounded">
+                    <strong>To test Update button:</strong> Click the yellow "Edit" button on any deck in the table, and the green button will change to say "Update"
+                </li>
+            </ol>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Visual Guide</h2>
+            
+            <div class="space-y-4">
+                <div class="border border-gray-300 rounded p-4">
+                    <h3 class="font-semibold mb-2">1. Initial State (No form visible)</h3>
+                    <div class="bg-gray-50 p-4 rounded">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-lg font-semibold">Decks</div>
+                            <div>
+                                <button class="px-4 py-2 bg-gray-500 text-white rounded mr-2">🔄 Refresh</button>
+                                <button class="px-4 py-2 bg-blue-500 text-white rounded">+ Add Deck</button> ← Click this!
+                            </div>
+                        </div>
+                        <p class="text-gray-500">No decks found</p>
+                    </div>
+                </div>
+
+                <div class="border border-green-300 rounded p-4 bg-green-50">
+                    <h3 class="font-semibold mb-2">2. After clicking "+ Add Deck" (Form appears)</h3>
+                    <div class="bg-white p-4 rounded border border-gray-200">
+                        <h4 class="font-semibold mb-3">Add New Deck</h4>
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <input type="text" placeholder="My Awesome Deck" class="border rounded px-3 py-2" />
+                            <select class="border rounded px-3 py-2">
+                                <option>Standard</option>
+                            </select>
+                            <input type="text" placeholder="Your Name" class="border rounded px-3 py-2" />
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button class="px-4 py-2 bg-gray-300 text-gray-700 rounded">Cancel</button>
+                            <button class="px-4 py-2 bg-green-500 text-white rounded">Create</button> ← This button saves!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border border-yellow-300 rounded p-4 bg-yellow-50">
+                    <h3 class="font-semibold mb-2">3. When editing a deck (Button changes to "Update")</h3>
+                    <div class="bg-white p-4 rounded border border-gray-200">
+                        <h4 class="font-semibold mb-3">Edit Deck</h4>
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <input type="text" value="Existing Deck" class="border rounded px-3 py-2" />
+                            <select class="border rounded px-3 py-2">
+                                <option>Commander</option>
+                            </select>
+                            <input type="text" value="Player Name" class="border rounded px-3 py-2" />
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button class="px-4 py-2 bg-gray-300 text-gray-700 rounded">Cancel</button>
+                            <button class="px-4 py-2 bg-green-500 text-white rounded">Update</button> ← This button saves changes!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-red-50 border-l-4 border-red-400 p-4">
+            <h3 class="font-semibold text-red-700 mb-2">Common Mistake:</h3>
+            <p class="text-red-700">
+                ❌ Looking for buttons immediately after page load<br>
+                ✅ Click "+ Add Deck" FIRST to reveal the form with the Create/Update buttons
+            </p>
+        </div>
+
+        <div class="mt-6 bg-blue-50 border-l-4 border-blue-400 p-4">
+            <h3 class="font-semibold text-blue-700 mb-2">Verify Buttons Exist:</h3>
+            <p class="text-blue-700 mb-2">Run this test in your terminal:</p>
+            <pre class="bg-gray-800 text-green-400 p-3 rounded overflow-x-auto"><code>curl -s http://localhost:8080/_app/immutable/nodes/6.4f6a837b.js | grep -o "Create\|Update\|Cancel" | uniq</code></pre>
+            <p class="text-blue-700 mt-2">Should output: Create, Update, Cancel</p>
+        </div>
+    </div>
+</body>
+</html>
+

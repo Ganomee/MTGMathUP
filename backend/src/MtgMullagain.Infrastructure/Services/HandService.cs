@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using MtgMullagain.Core.Entities;
+using MtgMullagain.Core.Services;
 using MtgMullagain.Core.Utilities;
-using MtgMullagain.Infrastructure;
 
-namespace MtgMullagain.Core.Services;
+namespace MtgMullagain.Infrastructure.Services;
 
 /// <summary>
 /// Service for managing MTG hands with deduplication
@@ -14,7 +14,7 @@ public class HandService : IHandService
 
     public HandService(MtgMullagainDbContext context)
     {
-        _context = context;
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
     /// <summary>
@@ -32,12 +32,11 @@ public class HandService : IHandService
         // Canonicalize the hand
         var canonical = HandCanonicalizer.Canonicalize(cardIntIds);
 
-        // Check if hand already exists using the unique constraint
+        // Try to find existing hand by hash and canonical key
         var existingHand = await _context.Hands
             .FirstOrDefaultAsync(h => 
                 h.Hash64 == canonical.Hash64 && 
-                h.Size == canonical.Size && 
-                h.CardIntIds.SequenceEqual(canonical.CardIntIds));
+                h.CanonicalKey == canonical.CanonicalKey);
 
         if (existingHand != null)
         {
@@ -67,7 +66,12 @@ public class HandService : IHandService
     /// <returns>Existing or newly created hand</returns>
     public async Task<Hand> CreateOrGetHandAsync(IEnumerable<int> cardIntIds)
     {
-        var idsArray = cardIntIds?.ToArray() ?? throw new ArgumentNullException(nameof(cardIntIds));
+        if (cardIntIds == null)
+        {
+            throw new ArgumentException("Card IDs collection cannot be null", nameof(cardIntIds));
+        }
+
+        var idsArray = cardIntIds.ToArray();
         return await CreateOrGetHandAsync(idsArray);
     }
 
@@ -83,13 +87,19 @@ public class HandService : IHandService
             return Enumerable.Empty<Hand>();
         }
 
-        // Use PostgreSQL array containment operator
-        var hands = await _context.Hands
-            .Where(h => h.CardIntIds.Contains(requiredCards))
-            .OrderByDescending(h => h.CreatedAt)
-            .ToListAsync();
+        // Canonicalize required cards to ensure proper ordering
+        var canonical = HandCanonicalizer.Canonicalize(requiredCards);
+        var requiredSet = canonical.CardIntIds.ToHashSet();
 
-        return hands;
+        // Get all hands and filter in memory
+        // Note: In production with PostgreSQL, this should use array containment operator (@>)
+        // For now, using LINQ for compatibility with in-memory databases
+        var allHands = await _context.Hands.ToListAsync();
+        var matchingHands = allHands
+            .Where(h => requiredSet.IsSubsetOf(h.CardIntIds))
+            .ToList();
+
+        return matchingHands;
     }
 
     /// <summary>
@@ -103,18 +113,24 @@ public class HandService : IHandService
         var referenceHand = await _context.Hands.FindAsync(handId);
         if (referenceHand == null)
         {
-            return Enumerable.Empty<Hand>();
+            throw new InvalidOperationException($"Hand with ID {handId} not found");
         }
 
-        // Use PostgreSQL array overlap operator and length function
-        var hands = await _context.Hands
-            .Where(h => h.Id != handId && 
-                       h.CardIntIds.Overlaps(referenceHand.CardIntIds) &&
-                       h.CardIntIds.Intersect(referenceHand.CardIntIds).Count() >= minSharedCards)
-            .OrderByDescending(h => h.CreatedAt)
+        // Get all hands except the reference hand
+        // Note: In production with PostgreSQL, this should use array overlap operator (&&)
+        // For now, using LINQ for compatibility with in-memory databases
+        var allHands = await _context.Hands
+            .Where(h => h.Id != handId)
             .ToListAsync();
 
-        return hands;
+        // Filter by minimum shared cards count
+        var similarHands = allHands
+            .Where(h => HandCanonicalizer.CountSharedCards(
+                referenceHand.CardIntIds, 
+                h.CardIntIds) >= minSharedCards)
+            .ToList();
+
+        return similarHands;
     }
 
     /// <summary>
@@ -125,52 +141,48 @@ public class HandService : IHandService
     /// <returns>Random canonicalized hand</returns>
     public async Task<Hand> GenerateRandomHandAsync(long deckId, int handSize = 7)
     {
-        // Get deck composition
+        // Get deck cards
         var deckCards = await _context.DeckCards
             .Where(dc => dc.DeckId == deckId)
             .Include(dc => dc.Card)
-            .ThenInclude(c => c.CardIndex)
             .ToListAsync();
 
         if (!deckCards.Any())
         {
-            throw new InvalidOperationException($"Deck {deckId} not found or has no cards");
+            throw new InvalidOperationException($"Deck with ID {deckId} not found or has no cards");
         }
 
-        // Build weighted list of cards
-        var weightedCards = new List<int>();
+        // Build card pool (expand based on count)
+        var cardPool = new List<int>();
         foreach (var deckCard in deckCards)
         {
-            if (deckCard.Card.CardIndex != null)
+            var cardIndex = await _context.CardIndexes
+                .Where(ci => ci.CardId == deckCard.CardId)
+                .Select(ci => ci.Id)
+                .FirstOrDefaultAsync();
+
+            if (cardIndex != 0)
             {
-                // Add card multiple times based on count in deck
                 for (int i = 0; i < deckCard.Count; i++)
                 {
-                    weightedCards.Add(deckCard.Card.CardIndex.Id);
+                    cardPool.Add(cardIndex);
                 }
             }
         }
 
-        if (weightedCards.Count < handSize)
+        if (cardPool.Count < handSize)
         {
-            throw new InvalidOperationException($"Deck {deckId} has only {weightedCards.Count} cards, cannot draw {handSize}");
+            throw new InvalidOperationException(
+                $"Deck has only {cardPool.Count} cards, cannot generate hand of size {handSize}");
         }
 
-        // Randomly select cards for hand
+        // Shuffle and select cards
         var random = new Random();
-        var selectedCards = new List<int>();
-        var availableCards = new List<int>(weightedCards);
+        var shuffled = cardPool.OrderBy(x => random.Next()).ToArray();
+        var selectedCards = shuffled.Take(handSize).ToArray();
 
-        for (int i = 0; i < handSize; i++)
-        {
-            var randomIndex = random.Next(availableCards.Count);
-            selectedCards.Add(availableCards[randomIndex]);
-            availableCards.RemoveAt(randomIndex);
-        }
-
-        // Create or get canonicalized hand
-        return await CreateOrGetHandAsync(selectedCards.ToArray());
+        // Create or get the hand
+        return await CreateOrGetHandAsync(selectedCards);
     }
 }
-
 

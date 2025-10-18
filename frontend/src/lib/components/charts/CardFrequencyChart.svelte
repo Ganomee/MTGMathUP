@@ -19,6 +19,18 @@
 	function getColor(item: any): string {
 		return item.color || colorMap[item.name.toLowerCase()] || '#3b82f6';
 	}
+
+	function formatTooltipValue(value: number): [number, string] {
+		return [value, 'Count'];
+	}
+
+	function formatTooltipLabel(label: string): string {
+		return `Card: ${label}`;
+	}
+
+	function getBarColor(entry: any): string {
+		return getColor(entry);
+	}
 </script>
 
 <div class="card">
@@ -36,12 +48,12 @@
 				/>
 				<YAxis />
 				<Tooltip 
-					formatter={(value: number) => [value, 'Count']}
-					labelFormatter={(label: string) => `Card: ${label}`}
+					formatter={formatTooltipValue}
+					labelFormatter={formatTooltipLabel}
 				/>
 				<Bar 
 					dataKey="count" 
-					fill={(entry: any) => getColor(entry)}
+					fill={getBarColor}
 					radius={[4, 4, 0, 0]}
 				/>
 			</BarChart>

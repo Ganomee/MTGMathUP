@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { apiClient, type Hand } from '$lib/api/client';
+	import { apiClient } from '$lib/api';
+	import type { Hand } from '$lib/api';
 	import CardFrequencyChart from '$lib/components/charts/CardFrequencyChart.svelte';
 	import HandSizeChart from '$lib/components/charts/HandSizeChart.svelte';
 	import EvaluationTrendChart from '$lib/components/charts/EvaluationTrendChart.svelte';
+	import { getCardNames } from '$lib/electric/card-utils.js';
 
 	let analysisData: any = null;
 	let loading = true;
@@ -84,18 +86,27 @@
 		} finally {
 			loading = false;
 		}
+		
+		// Load card names after analysis data is loaded
+		await loadCardNames();
 	});
 
+	let cardNames: Record<number, string> = {};
+
+	// Load card names for analysis
+	async function loadCardNames() {
+		try {
+			const allCardIds = [
+				...analysisData.mostPreferredHand.cardIntIds,
+				...analysisData.leastPreferredHand.cardIntIds
+			];
+			cardNames = await getCardNames(allCardIds);
+		} catch (error) {
+			console.error('Failed to load card names:', error);
+		}
+	}
+
 	function getCardName(cardId: number): string {
-		const cardNames: Record<number, string> = {
-			1: 'Lightning Bolt',
-			2: 'Counterspell',
-			3: 'Brainstorm',
-			4: 'Ponder',
-			5: 'Island',
-			6: 'Mountain',
-			7: 'Volcanic Island'
-		};
 		return cardNames[cardId] || `Card ${cardId}`;
 	}
 </script>

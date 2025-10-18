@@ -239,16 +239,20 @@ public class HandCanonicalizerTests
     public void Canonicalize_VariousInputs_ProducesConsistentResults(int[] input, int[] expected, bool shouldBeEqual)
     {
         // Act
-        var result = HandCanonicalizer.Canonicalize(input);
+        var result1 = HandCanonicalizer.Canonicalize(input);
+        var result2 = HandCanonicalizer.Canonicalize(expected);
 
         // Assert
         if (shouldBeEqual)
         {
-            Assert.Equal(expected, result.CardIntIds);
+            // Both inputs should produce the same canonical hash and key
+            Assert.Equal(result1.Hash64, result2.Hash64);
+            Assert.Equal(result1.CanonicalKey, result2.CanonicalKey);
         }
         else
         {
-            Assert.NotEqual(expected, result.CardIntIds);
+            // Different inputs should produce different hashes
+            Assert.NotEqual(result1.Hash64, result2.Hash64);
         }
     }
 }

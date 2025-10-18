@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { apiClient, type Hand, type HandEvaluationRequest } from '$lib/api/client';
+	import { apiClient } from '$lib/api';
+	import type { Hand, HandEvaluationRequest } from '$lib/api';
 	import HandCompare from '$lib/components/HandCompare.svelte';
 	import HandViewer from '$lib/components/HandViewer.svelte';
 

@@ -9,6 +9,14 @@
 		const date = new Date(dateStr);
 		return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 	}
+
+	function formatTooltipValue(value: number, name: string): [number, string] {
+		return [value, name === 'evaluations' ? 'Daily Evaluations' : 'Total Evaluations'];
+	}
+
+	function formatTooltipLabel(label: string): string {
+		return `Date: ${formatDate(label)}`;
+	}
 </script>
 
 <div class="card">
@@ -24,11 +32,8 @@
 				/>
 				<YAxis />
 				<Tooltip 
-					formatter={(value: number, name: string) => [
-						value, 
-						name === 'evaluations' ? 'Daily Evaluations' : 'Total Evaluations'
-					]}
-					labelFormatter={(label: string) => `Date: ${formatDate(label)}`}
+					formatter={formatTooltipValue}
+					labelFormatter={formatTooltipLabel}
 				/>
 				<Line 
 					type="monotone" 

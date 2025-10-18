@@ -10,5 +10,7 @@ export default defineConfig({
 	preview: {
 		port: 4173,
 		host: true
-	}
+	},
+	// Ensure mana-font assets are included
+	assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.eot', '**/*.svg', '**/*.sql']
 });

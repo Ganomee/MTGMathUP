@@ -58,5 +58,6 @@ public class Card
     // Navigation properties
     public virtual ICollection<DeckCard> DeckCards { get; set; } = new List<DeckCard>();
     public virtual CardIndex? CardIndex { get; set; }
-    public virtual CardEmbedding? CardEmbedding { get; set; }
+    // Temporarily disabled until pgvector is installed
+    // public virtual CardEmbedding? CardEmbedding { get; set; }
 }

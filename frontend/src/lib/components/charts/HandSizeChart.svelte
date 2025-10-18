@@ -9,6 +9,18 @@
 	function getColor(index: number, item: any): string {
 		return item.color || COLORS[index % COLORS.length];
 	}
+
+	function formatPieLabel({ name, percent }: { name: string; percent: number }): string {
+		return `${name}: ${(percent * 100).toFixed(0)}%`;
+	}
+
+	function formatTooltipValue(value: number): [number, string] {
+		return [value, 'Hands'];
+	}
+
+	function formatTooltipLabel(label: string): string {
+		return `Size: ${label}`;
+	}
 </script>
 
 <div class="card">
@@ -21,7 +33,7 @@
 					cx="50%"
 					cy="50%"
 					labelLine={false}
-					label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+					label={formatPieLabel}
 					outerRadius={80}
 					fill="#8884d8"
 					dataKey="value"
@@ -31,8 +43,8 @@
 					{/each}
 				</Pie>
 				<Tooltip 
-					formatter={(value: number) => [value, 'Hands']}
-					labelFormatter={(label: string) => `Size: ${label}`}
+					formatter={formatTooltipValue}
+					labelFormatter={formatTooltipLabel}
 				/>
 				<Legend />
 			</PieChart>

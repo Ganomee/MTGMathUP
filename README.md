@@ -5,15 +5,17 @@ Compare Magic: The Gathering hands, analyze mulligans, and learn which keeps are
 ## Quick Start
 
 ```bash
+# Build ML Worker with GPU support (first time - takes 30+ mins)
+./build-ml-worker.sh
+
 # Start all services
 docker compose up
 
 # Start without ML worker (recommended for development)
 docker compose up --scale ml-worker=0
-
-# Start with ML worker
-docker compose up --profile ml
 ```
+
+**GPU Support**: The ML Worker now supports NVIDIA GPU acceleration with CUDA 12.1. See [DOCKER_GPU_SETUP.md](./DOCKER_GPU_SETUP.md) for detailed setup instructions.
 
 ## Services
 
@@ -38,12 +40,14 @@ npm install
 npm run dev
 ```
 
-### ML Worker (Python)
+### ML Worker (Python with CUDA GPU Support)
 ```bash
 cd ml-worker
 pip install -r requirements.txt
 python main.py
 ```
+
+**Note**: The ML Worker uses PyTorch with CUDA 12.1 for GPU acceleration. For GPU setup in Docker, see [DOCKER_GPU_SETUP.md](./DOCKER_GPU_SETUP.md).
 
 ## Database Setup
 
@@ -89,9 +93,9 @@ mtg-mullagain/
 
 - **Backend**: .NET 8, EF Core, PostgreSQL + pgvector
 - **Frontend**: SvelteKit, TypeScript, TailwindCSS, PWA
-- **ML Worker**: Python, FastAPI, sentence-transformers
+- **ML Worker**: Python, FastAPI, PyTorch (CUDA 12.1), sentence-transformers
 - **Database**: PostgreSQL 16 with pgvector extension
-- **Deployment**: Docker Compose
+- **Deployment**: Docker Compose with GPU support
 
 ## License
 

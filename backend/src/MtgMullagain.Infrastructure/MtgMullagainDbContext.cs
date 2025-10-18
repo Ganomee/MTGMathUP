@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using MtgMullagain.Core.Entities;
 using Pgvector.EntityFrameworkCore;
@@ -20,15 +21,42 @@ public class MtgMullagainDbContext : DbContext
     public DbSet<DeckCard> DeckCards { get; set; } = null!;
     public DbSet<Hand> Hands { get; set; } = null!;
     public DbSet<HandEval> HandEvals { get; set; } = null!;
-    public DbSet<CardEmbedding> CardEmbeddings { get; set; } = null!;
-    public DbSet<HandEmbedding> HandEmbeddings { get; set; } = null!;
+    public DbSet<ImportMetadata> ImportMetadata { get; set; } = null!;
+    // Temporarily disabled until pgvector is installed in Docker
+    // public DbSet<CardEmbedding> CardEmbeddings { get; set; } = null!;
+    // public DbSet<HandEmbedding> HandEmbeddings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Enable pgvector extension
-        modelBuilder.HasPostgresExtension("vector");
+        // Configure all entity properties to use snake_case naming
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            // Convert table names to snake_case
+            entity.SetTableName(ToSnakeCase(entity.GetTableName()!));
+
+            // Convert column names to snake_case
+            foreach (var property in entity.GetProperties())
+            {
+                property.SetColumnName(ToSnakeCase(property.Name));
+            }
+
+            // Convert primary key names to snake_case
+            foreach (var key in entity.GetKeys())
+            {
+                key.SetName(ToSnakeCase(key.GetName()!));
+            }
+
+            // Convert foreign key names to snake_case
+            foreach (var foreignKey in entity.GetForeignKeys())
+            {
+                foreignKey.SetConstraintName(ToSnakeCase(foreignKey.GetConstraintName()!));
+            }
+        }
+
+        // Enable pgvector extension - commented out until installed
+        // modelBuilder.HasPostgresExtension("vector");
 
         // Configure Card entity
         modelBuilder.Entity<Card>(entity =>
@@ -104,8 +132,9 @@ public class MtgMullagainDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.CardIntIds).HasColumnType("integer[]");
             entity.Property(e => e.Size).HasColumnType("smallint");
-            entity.Property(e => e.CanonicalKey)
-                  .HasComputedColumnSql("array_to_string(\"CardIntIds\", ',')", stored: true);
+            // Computed column commented out due to PostgreSQL immutability requirement
+            // entity.Property(e => e.CanonicalKey)
+            //       .HasComputedColumnSql("array_to_string(\"CardIntIds\", ',')", stored: true);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
             
             // Unique constraint for deduplication (hash64, size, card_int_ids)
@@ -151,6 +180,22 @@ public class MtgMullagainDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // Configure ImportMetadata entity
+        modelBuilder.Entity<ImportMetadata>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Type).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            entity.Property(e => e.ImportedAt).IsRequired().HasDefaultValueSql("NOW()");
+            entity.Property(e => e.DownloadUri).HasMaxLength(500);
+            
+            // Indexes
+            entity.HasIndex(e => e.Type).HasDatabaseName("IX_ImportMetadata_Type");
+            entity.HasIndex(e => e.ImportedAt).HasDatabaseName("IX_ImportMetadata_ImportedAt");
+        });
+
+        // CardEmbedding and HandEmbedding temporarily disabled until pgvector is installed
+        /*
         // Configure CardEmbedding entity
         modelBuilder.Entity<CardEmbedding>(entity =>
         {
@@ -196,5 +241,34 @@ public class MtgMullagainDbContext : DbContext
                   .HasForeignKey<HandEmbedding>(e => e.HandId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
+        */
+    }
+
+    /// <summary>
+    /// Converts PascalCase string to snake_case
+    /// </summary>
+    private static string ToSnakeCase(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return name;
+
+        var builder = new StringBuilder();
+        builder.Append(char.ToLowerInvariant(name[0]));
+
+        for (int i = 1; i < name.Length; i++)
+        {
+            char c = name[i];
+            if (char.IsUpper(c))
+            {
+                builder.Append('_');
+                builder.Append(char.ToLowerInvariant(c));
+            }
+            else
+            {
+                builder.Append(c);
+            }
+        }
+
+        return builder.ToString();
     }
 }

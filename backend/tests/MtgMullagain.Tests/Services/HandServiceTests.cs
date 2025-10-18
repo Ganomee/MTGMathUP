@@ -22,7 +22,7 @@ public class HandServiceTests : IDisposable
         var services = new ServiceCollection();
         services.AddDbContext<MtgMullagainDbContext>(options =>
             options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
-        services.AddScoped<IHandService, HandService>();
+        services.AddScoped<IHandService, MtgMullagain.Infrastructure.Services.HandService>();
 
         _serviceProvider = services.BuildServiceProvider();
         _context = _serviceProvider.GetRequiredService<MtgMullagainDbContext>();

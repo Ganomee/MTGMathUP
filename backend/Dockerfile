@@ -22,6 +22,11 @@ RUN dotnet publish ./src/MtgMullagain.Api -c Release -o /out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
+# Install wget for healthcheck
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends wget && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy published application
 COPY --from=build /out .
 

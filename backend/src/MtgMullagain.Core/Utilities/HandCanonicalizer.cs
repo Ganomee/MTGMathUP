@@ -69,7 +69,7 @@ public static class HandCanonicalizer
         Buffer.BlockCopy(sortedCardIds, 0, bytes, 0, bytes.Length);
         
         // Compute xxHash64 with seed 0 for deterministic results
-        var hash = xxHash64.ComputeHash(bytes, bytes.Length, 0);
+        var hash = xxHash64.ComputeHash(bytes, 0, bytes.Length, 0);
         
         return (long)hash;
     }

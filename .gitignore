@@ -1,0 +1,66 @@
+# Root .gitignore for MTG MathUP project
+
+# OS and IDE files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.cursor/
+
+# Database files
+data/postgres/
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/
+scripts/*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+
+# Node modules (handled by frontend .gitignore but good to have at root)
+node_modules/
+
+# .NET build artifacts (handled by backend .gitignore but good to have at root)
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# Docker volumes
+volumes/
+
+# Test results
+TestResults/
+test-results/
+coverage/
+
+# Package files
+*.nupkg
+*.snupkg
+

@@ -36,6 +36,7 @@ public class Hand
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     // Navigation properties
-    public virtual HandEmbedding? HandEmbedding { get; set; }
+    // Temporarily disabled until pgvector is installed
+    // public virtual HandEmbedding? HandEmbedding { get; set; }
     public virtual ICollection<HandEval> HandEvals { get; set; } = new List<HandEval>();
 }

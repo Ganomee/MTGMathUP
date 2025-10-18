@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import type { Hand } from '$lib/api';
 
-	export let hand1: any;
-	export let hand2: any;
+	export let hand1: Hand;
+	export let hand2: Hand;
 
 	const dispatch = createEventDispatcher();
 
@@ -58,7 +59,7 @@
 			<div class="text-center">
 				<div class="text-2xl mb-2">🃏</div>
 				<div class="font-medium">Hand A</div>
-				<div class="text-sm text-gray-600">{hand1.cards.length} cards</div>
+				<div class="text-sm text-gray-600">{hand1.cardIntIds.length} cards</div>
 			</div>
 		</button>
 		
@@ -69,7 +70,7 @@
 			<div class="text-center">
 				<div class="text-2xl mb-2">🃏</div>
 				<div class="font-medium">Hand B</div>
-				<div class="text-sm text-gray-600">{hand2.cards.length} cards</div>
+				<div class="text-sm text-gray-600">{hand2.cardIntIds.length} cards</div>
 			</div>
 		</button>
 	</div>

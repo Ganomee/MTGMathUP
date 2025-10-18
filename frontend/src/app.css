@@ -1,3 +1,6 @@
+/* Import Mana Font for MTG symbols - must be first! */
+@import 'mana-font/css/mana.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

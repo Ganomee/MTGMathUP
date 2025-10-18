@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import { parseDeckList, validateDeckCards } from '$lib/electric/card-utils.js';
+	import { createDeck } from '$lib/electric/store.js';
+	import type { Card } from '$lib/electric/types.js';
 
 	const dispatch = createEventDispatcher();
 
@@ -7,38 +10,84 @@
 	let deckUrl = '';
 	let uploadMethod: 'manual' | 'url' | 'file' = 'manual';
 	let loading = false;
+	let validationResults: {
+		valid: Array<{ name: string; card: Card; count: number }>;
+		invalid: string[];
+	} | null = null;
+	let deckName = '';
 
 	async function handleSubmit() {
 		if (!deckText && !deckUrl) return;
 		
 		loading = true;
+		validationResults = null;
 		
 		try {
-			// TODO: Implement deck import logic
-			// This would call the backend API to:
-			// 1. Parse the deck list
-			// 2. Validate cards against Scryfall
-			// 3. Create deck in database
-			// 4. Return deck ID
+			// Parse deck list
+			const deckList = parseDeckList(deckText);
+			const cardNames = deckList.map(item => item.name);
 			
-			await new Promise(resolve => setTimeout(resolve, 1000)); // Mock delay
+			// Validate cards against local database
+			const validation = await validateDeckCards(cardNames);
 			
-			const mockDeck = {
-				id: 1,
-				name: 'Imported Deck',
-				cardCount: deckText.split('\n').length
+			// Combine validation results with counts
+			const validCards = deckList
+				.filter(item => validation.valid.some(v => v.name === item.name))
+				.map(item => ({
+					...item,
+					card: validation.valid.find(v => v.name === item.name)!.card
+				}));
+			
+			const invalidCards = deckList
+				.filter(item => validation.invalid.includes(item.name))
+				.map(item => item.name);
+			
+			validationResults = {
+				valid: validCards,
+				invalid: invalidCards
 			};
 			
-			dispatch('deckImported', mockDeck);
-			
-			// Reset form
-			deckText = '';
-			deckUrl = '';
+			// If there are valid cards, create the deck
+			if (validCards.length > 0) {
+				const deckId = await createDeck({
+					name: deckName || 'Imported Deck',
+					format: 'Unknown',
+					owner: undefined
+				});
+				
+				dispatch('deckImported', {
+					id: deckId,
+					name: deckName || 'Imported Deck',
+					cardCount: validCards.length,
+					validationResults
+				});
+				
+				// Reset form
+				deckText = '';
+				deckUrl = '';
+				deckName = '';
+				validationResults = null;
+			}
 		} catch (error) {
 			console.error('Deck import failed:', error);
 		} finally {
 			loading = false;
 		}
+	}
+
+	function getCardColorClass(colors: string[]): string {
+		if (colors.length === 0) return 'bg-gray-100';
+		if (colors.length === 1) {
+			switch (colors[0]) {
+				case 'W': return 'bg-white border border-gray-300';
+				case 'U': return 'bg-blue-500 text-white';
+				case 'B': return 'bg-gray-800 text-white';
+				case 'R': return 'bg-red-500 text-white';
+				case 'G': return 'bg-green-500 text-white';
+				default: return 'bg-gray-100';
+			}
+		}
+		return 'bg-gradient-to-r from-yellow-400 to-purple-500 text-white';
 	}
 
 	function handleFileUpload(event: Event) {
@@ -76,6 +125,19 @@
 		>
 			Upload File
 		</button>
+	</div>
+
+	<!-- Deck Name -->
+	<div>
+		<label for="deckName" class="block text-sm font-medium text-gray-700 mb-2">
+			Deck Name
+		</label>
+		<input
+			id="deckName"
+			bind:value={deckName}
+			placeholder="My Awesome Deck"
+			class="input"
+		/>
 	</div>
 
 	<!-- Manual Entry -->
@@ -143,4 +205,56 @@
 	>
 		{loading ? 'Importing...' : 'Import Deck'}
 	</button>
+
+	<!-- Validation Results -->
+	{#if validationResults}
+		<div class="mt-6 space-y-4">
+			<!-- Valid Cards -->
+			{#if validationResults.valid.length > 0}
+				<div>
+					<h3 class="text-lg font-semibold text-green-700 mb-3">
+						Valid Cards ({validationResults.valid.length})
+					</h3>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+						{#each validationResults.valid as item}
+							<div class="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+								<div class="flex items-center space-x-3">
+									<div class="w-6 h-6 rounded-full border {getCardColorClass(item.card.colors)} flex items-center justify-center text-xs font-bold">
+										{item.card.cmc}
+									</div>
+									<div>
+										<div class="font-medium text-green-800">{item.name}</div>
+										<div class="text-sm text-green-600">{item.card.type}</div>
+									</div>
+								</div>
+								<span class="text-sm font-bold text-green-700">x{item.count}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Invalid Cards -->
+			{#if validationResults.invalid.length > 0}
+				<div>
+					<h3 class="text-lg font-semibold text-red-700 mb-3">
+						Invalid Cards ({validationResults.invalid.length})
+					</h3>
+					<div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+						<p class="text-red-700 mb-2">The following cards were not found in the database:</p>
+						<div class="flex flex-wrap gap-2">
+							{#each validationResults.invalid as cardName}
+								<span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">
+									{cardName}
+								</span>
+							{/each}
+						</div>
+						<p class="text-sm text-red-600 mt-2">
+							These cards may need to be imported from Scryfall first.
+						</p>
+					</div>
+				</div>
+			{/if}
+		</div>
+	{/if}
 </div>
